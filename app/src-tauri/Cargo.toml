@@ -1,0 +1,38 @@
+[package]
+name = "lockin"
+version = "0.1.0"
+description = "Lean, ad-free League of Legends companion (champ select auto-import, auto-accept)"
+authors = ["arikc"]
+edition = "2024"
+
+[lib]
+# The `_lib` suffix keeps the lib name distinct from the bin name (Windows quirk,
+# see https://github.com/rust-lang/cargo/issues/8519).
+name = "lockin_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["tray-icon"] }
+tauri-plugin-store = "2"
+tauri-plugin-single-instance = "2"
+tauri-plugin-autostart = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+# Async runtime (already pulled in by tauri); only the extra features we use.
+tokio = { version = "1", features = ["time", "sync", "macros", "net"] }
+# HTTP: native TLS (SChannel on Windows, Security.framework on macOS) so no C
+# toolchain or extra crypto library is needed.
+reqwest = { version = "0.13", default-features = false, features = ["native-tls", "json"] }
+native-tls = "0.2"
+tokio-tungstenite = { version = "0.30", default-features = false, features = ["connect", "native-tls"] }
+futures-util = { version = "0.3", default-features = false, features = ["sink", "std"] }
+base64 = "0.22"
+# Process discovery (LeagueClientUx command line / exe path). Only the process module.
+sysinfo = { version = "0.39", default-features = false, features = ["system"] }
+# RFC 3339 timestamps in OP.GG match history (already in the tree via tauri).
+time = { version = "0.3", features = ["parsing"] }
+# Union-find for grouping likely premade pairs into parties.
+petgraph = { version = "0.8", default-features = false }

@@ -1,0 +1,29 @@
+{
+  "gameId": 7000000001,
+  "localPlayerCellId": 2,
+  "isCustomGame": false,
+  "timer": { "phase": "BAN_PICK", "adjustedTimeLeftInPhase": 25000 },
+  "actions": [
+    [
+      { "id": 1, "actorCellId": 0, "championId": 0, "completed": true, "type": "ban", "isInProgress": false },
+      { "id": 2, "actorCellId": 2, "championId": 238, "completed": true, "type": "ban", "isInProgress": false }
+    ],
+    [
+      { "id": 11, "actorCellId": 0, "championId": 266, "completed": true, "type": "pick", "isInProgress": false },
+      { "id": 12, "actorCellId": 2, "championId": 103, "completed": true, "type": "pick", "isInProgress": false }
+    ]
+  ],
+  "myTeam": [
+    { "cellId": 0, "championId": 266, "championPickIntent": 0, "assignedPosition": "top", "spell1Id": 4, "spell2Id": 12,
+      "gameName": "", "tagLine": "", "puuid": "", "nameVisibilityType": "HIDDEN", "summonerId": 0 },
+    { "cellId": 1, "championId": 0, "championPickIntent": 64, "assignedPosition": "jungle", "spell1Id": 11, "spell2Id": 4,
+      "gameName": "Duo Partner", "tagLine": "EUW", "puuid": "puuid-friend", "nameVisibilityType": "VISIBLE", "summonerId": 111 },
+    { "cellId": 2, "championId": 103, "championPickIntent": 0, "assignedPosition": "MIDDLE", "spell1Id": 14, "spell2Id": 4,
+      "gameName": "Me Myself", "tagLine": "1234", "puuid": "puuid-me", "nameVisibilityType": "VISIBLE", "summonerId": 222 },
+    { "cellId": 3, "championId": 0, "championPickIntent": 0, "assignedPosition": "bottom", "spell1Id": 7, "spell2Id": 4,
+      "gameName": "Should Not Leak", "tagLine": "XX", "puuid": "puuid-hidden", "nameVisibilityType": "HIDDEN", "summonerId": 0 },
+    { "cellId": 4, "championId": 0, "championPickIntent": 0, "assignedPosition": "utility", "spell1Id": 3, "spell2Id": 4,
+      "puuid": "puuid-unknown" }
+  ],
+  "theirTeam": []
+}

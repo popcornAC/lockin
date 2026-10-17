@@ -1,0 +1,103 @@
+/* Lockin palette and base styles. Dark only: it sits next to the League client. */
+:root {
+  --font: system-ui, -apple-system, "Segoe UI Variable Text", "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+
+  --bg: #070b12;
+  --surface: #0d141f;
+  --surface-2: #121b28;
+  --surface-3: #182333;
+  --inset: #0a1019;
+  --hover: rgba(200, 170, 110, 0.06);
+  --line: #1b2636;
+  --line-strong: #263447;
+
+  --text: #ece6d6;
+  --text-2: #c9c3b4;
+  --muted: #8a93a1;
+  --faint: #5d6878;
+
+  --gold: #c9a45c;
+  --gold-bright: #f0dfae;
+  --gold-dim: #8a6f3e;
+  --gold-deep: #6d5426;
+  --gold-glow: rgba(214, 176, 96, 0.55);
+  --gold-wash: rgba(201, 164, 92, 0.12);
+  --gold-line: rgba(201, 164, 92, 0.32);
+
+  --teal: #3fb7c4;
+  --teal-bright: #7fd8e0;
+  --teal-wash: rgba(63, 183, 196, 0.1);
+  --teal-line: rgba(63, 183, 196, 0.28);
+
+  --ok: #4cc38a;
+  --warn: #e3a948;
+  --bad: #e26a5f;
+  --blue: #4c8fe8;
+  --red: #e0605a;
+
+  --skill-q: #5fc9d4;
+  --skill-w: #8fb4f0;
+  --skill-e: #c49af0;
+
+  color-scheme: dark;
+  font-family: var(--font);
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+::selection {
+  background: var(--gold-line);
+}
+
+/* Thin, unobtrusive scrollbars (WebView2 + WebKit). */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--line-strong);
+  border-radius: 4px;
+  border: 2px solid var(--bg);
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+button,
+select,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

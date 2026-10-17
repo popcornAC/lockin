@@ -1,0 +1,11 @@
+class LolGetChampionAnalysis: data
+class Data: summary,core_items,boots,starter_items,fourth_items,fifth_items,sixth_items,summoner_spells,runes,skills
+class Summary: positions
+class Position: name,stats
+class Stats: play,win_rate,pick_rate
+class CoreItems: ids,ids_names,play,win,pick_rate
+class Boots: ids,ids_names
+class Runes: id,primary_page_id,primary_rune_ids,secondary_page_id,secondary_rune_ids,stat_mod_ids,play,win,pick_rate
+class Skills: order
+
+LolGetChampionAnalysis(Data(Summary([Position("MID",Stats(434608,0.51,0.09))]),CoreItems([3118,4645,3157],["Malignance","Shadowflame","Zhonya's Hourglass"],37921,20099,0.15),Boots([3020],["Sorcerer's Shoes"]),Boots([1056,2003,2003],["Doran's Ring","Health Potion","Health Potion"]),[CoreItems([3089],["Rabadon's Deathcap"],35173,20171,0.33),CoreItems([3157],["Zhonya's Hourglass"],26439,15402,0.25),CoreItems([4645],["Shadowflame"],8324,4818,0.08)],[CoreItems([3089],["Rabadon's Deathcap"],6135,3722,0.21),CoreItems([3135],["Void Staff"],4796,2627,0.16),CoreItems([3157],["Zhonya's Hourglass"],4496,2654,0.15)],[CoreItems([4629],["Cosmic Drive"],96,46,0.15),CoreItems([3135],["Void Staff"],94,50,0.15),CoreItems([4646],["Stormsurge"],67,34,0.11)],CoreItems([4,14],[4,14],291068,150268,0.71),Runes(8112,8100,[8112,8139,8140,8106],8200,[8210,8226],[5005,5008,5001],225190,114145,0.54),Skills(["W","Q","E","Q","Q","R","Q","W","Q","W","R","W","W","E","E"])))

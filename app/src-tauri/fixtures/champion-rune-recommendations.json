@@ -1,0 +1,602 @@
+[
+ {
+  "championId": 266,
+  "isOverride": false,
+  "runeRecommendations": [
+   {
+    "position": "NONE",
+    "mapId": 12,
+    "isDefaultPosition": true,
+    "minSummonerLevel": 1,
+    "perkIds": [
+     8010,
+     9111,
+     9105,
+     8299,
+     8473,
+     8453,
+     5008,
+     5008,
+     5001
+    ],
+    "primaryPerkStyleId": 8000,
+    "secondaryPerkStyleId": 8400,
+    "summonerSpellIds": [
+     4,
+     32
+    ],
+    "recommendationId": "2026-09-29.000001"
+   },
+   {
+    "position": "NONE",
+    "mapId": 12,
+    "isDefaultPosition": true,
+    "minSummonerLevel": 1,
+    "perkIds": [
+     8010,
+     9111,
+     9105,
+     8299,
+     8139,
+     8135,
+     5008,
+     5008,
+     5001
+    ],
+    "primaryPerkStyleId": 8000,
+    "secondaryPerkStyleId": 8100,
+    "summonerSpellIds": [
+     4,
+     32
+    ],
+    "recommendationId": "2026-09-29.000002"
+   },
+   {
+    "position": "JUNGLE",
+    "mapId": 11,
+    "isDefaultPosition": false,
+    "minSummonerLevel": 1,
+    "perkIds": [
+     8010,
+     9111,
+     9105,
+     8299,
+     8347,
+     8304,
+     5008,
+     5008,
+     5001
+    ],
+    "primaryPerkStyleId": 8000,
+    "secondaryPerkStyleId": 8300,
+    "summonerSpellIds": [
+     4,
+     11
+    ],
+    "recommendationId": "2026-09-29.000517"
+   },
+   {
+    "position": "JUNGLE",
+    "mapId": 11,
+    "isDefaultPosition": false,
+    "minSummonerLevel": 1,
+    "perkIds": [
+     8010,
+     9111,
+     9105,
+     8299,
+     8139,
+     8135,
+     5008,
+     5008,
+     5001
+    ],
+    "primaryPerkStyleId": 8000,
+    "secondaryPerkStyleId": 8100,
+    "summonerSpellIds": [
+     4,
+     11
+    ],
+    "recommendationId": "2026-09-29.000518"
+   },
+   {
+    "position": "TOP",
+    "mapId": 11,
+    "isDefaultPosition": true,
+    "minSummonerLevel": 1,
+    "perkIds": [
+     8010,
+     9111,
+     9105,
+     8299,
+     8473,
+     8453,
+     5008,
+     5008,
+     5001
+    ],
+    "primaryPerkStyleId": 8000,
+    "secondaryPerkStyleId": 8400,
+    "summonerSpellIds": [
+     4,
+     14
+    ],
+    "recommendationId": "2026-09-29.000519"
+   },
+   {
+    "position": "TOP",
+    "mapId": 11,
+    "isDefaultPosition": true,
+    "minSummonerLevel": 1,
+    "perkIds": [
+     8010,
+     9111,
+     9105,
+     8299,
+     8139,
+     8135,
+     5008,
+     5008,
+     5001
+    ],
+    "primaryPerkStyleId": 8000,
+    "secondaryPerkStyleId": 8100,
+    "summonerSpellIds": [
+     4,
+     14
+    ],
+    "recommendationId": "2026-09-29.000520"
+   }
+  ]
+ },
+ {
+  "championId": 103,
+  "isOverride": false,
+  "runeRecommendations": [
+   {
+    "position": "NONE",
+    "mapId": 12,
+    "isDefaultPosition": true,
+    "minSummonerLevel": 1,
+    "perkIds": [
+     8128,
+     8126,
+     8140,
+     8106,
+     8014,
+     8009,
+     5008,
+     5008,
+     5001
+    ],
+    "primaryPerkStyleId": 8100,
+    "secondaryPerkStyleId": 8000,
+    "summonerSpellIds": [
+     4,
+     32
+    ],
+    "recommendationId": "2026-09-29.000003"
+   },
+   {
+    "position": "NONE",
+    "mapId": 12,
+    "isDefaultPosition": true,
+    "minSummonerLevel": 1,
+    "perkIds": [
+     8112,
+     8143,
+     8140,
+     8106,
+     8226,
+     8210,
+     5008,
+     5008,
+     5001
+    ],
+    "primaryPerkStyleId": 8100,
+    "secondaryPerkStyleId": 8200,
+    "summonerSpellIds": [
+     4,
+     32
+    ],
+    "recommendationId": "2026-09-29.000004"
+   },
+   {
+    "position": "NONE",
+    "mapId": 12,
+    "isDefaultPosition": true,
+    "minSummonerLevel": 1,
+    "perkIds": [
+     8112,
+     8126,
+     8140,
+     8106,
+     8014,
+     8009,
+     5008,
+     5008,
+     5001
+    ],
+    "primaryPerkStyleId": 8100,
+    "secondaryPerkStyleId": 8000,
+    "summonerSpellIds": [
+     4,
+     32
+    ],
+    "recommendationId": "2026-09-29.000005"
+   },
+   {
+    "position": "MIDDLE",
+    "mapId": 11,
+    "isDefaultPosition": true,
+    "minSummonerLevel": 1,
+    "perkIds": [
+     8112,
+     8139,
+     8140,
+     8106,
+     8226,
+     8210,
+     5005,
+     5008,
+     5001
+    ],
+    "primaryPerkStyleId": 8100,
+    "secondaryPerkStyleId": 8200,
+    "summonerSpellIds": [
+     4,
+     14
+    ],
+    "recommendationId": "2026-09-29.000521"
+   },
+   {
+    "position": "MIDDLE",
+    "mapId": 11,
+    "isDefaultPosition": true,
+    "minSummonerLevel": 1,
+    "perkIds": [
+     8992,
+     8226,
+     8210,
+     8237,
+     8139,
+     8106,
+     5005,
+     5008,
+     5001
+    ],
+    "primaryPerkStyleId": 8200,
+    "secondaryPerkStyleId": 8100,
+    "summonerSpellIds": [
+     4,
+     14
+    ],
+    "recommendationId": "2026-09-29.000522"
+   },
+   {
+    "position": "MIDDLE",
+    "mapId": 11,
+    "isDefaultPosition": true,
+    "minSummonerLevel": 1,
+    "perkIds": [
+     8112,
+     8139,
+     8140,
+     8106,
+     8345,
+     8347,
+     5005,
+     5008,
+     5001
+    ],
+    "primaryPerkStyleId": 8100,
+    "secondaryPerkStyleId": 8300,
+    "summonerSpellIds": [
+     4,
+     14
+    ],
+    "recommendationId": "2026-09-29.000523"
+   }
+  ]
+ },
+ {
+  "championId": 266,
+  "isOverride": false,
+  "runeRecommendations": [
+   {
+    "position": "NONE",
+    "mapId": 12,
+    "isDefaultPosition": true,
+    "minSummonerLevel": 1,
+    "perkIds": [
+     8010,
+     9111,
+     9105,
+     8299,
+     8473,
+     8453,
+     5008,
+     5008,
+     5001
+    ],
+    "primaryPerkStyleId": 8000,
+    "secondaryPerkStyleId": 8400,
+    "summonerSpellIds": [
+     4,
+     32
+    ],
+    "recommendationId": "2026-03-16.000001"
+   },
+   {
+    "position": "NONE",
+    "mapId": 12,
+    "isDefaultPosition": true,
+    "minSummonerLevel": 1,
+    "perkIds": [
+     8010,
+     9111,
+     9105,
+     8299,
+     8139,
+     8135,
+     5008,
+     5008,
+     5001
+    ],
+    "primaryPerkStyleId": 8000,
+    "secondaryPerkStyleId": 8100,
+    "summonerSpellIds": [
+     4,
+     32
+    ],
+    "recommendationId": "2026-03-16.000002"
+   },
+   {
+    "position": "JUNGLE",
+    "mapId": 11,
+    "isDefaultPosition": false,
+    "minSummonerLevel": 1,
+    "perkIds": [
+     8010,
+     9111,
+     9105,
+     8299,
+     8347,
+     8304,
+     5008,
+     5008,
+     5001
+    ],
+    "primaryPerkStyleId": 8000,
+    "secondaryPerkStyleId": 8300,
+    "summonerSpellIds": [
+     4,
+     11
+    ],
+    "recommendationId": "2026-03-16.000514"
+   },
+   {
+    "position": "JUNGLE",
+    "mapId": 11,
+    "isDefaultPosition": false,
+    "minSummonerLevel": 1,
+    "perkIds": [
+     8010,
+     9111,
+     9105,
+     8299,
+     8139,
+     8135,
+     5008,
+     5008,
+     5001
+    ],
+    "primaryPerkStyleId": 8000,
+    "secondaryPerkStyleId": 8100,
+    "summonerSpellIds": [
+     4,
+     11
+    ],
+    "recommendationId": "2026-03-16.000515"
+   },
+   {
+    "position": "TOP",
+    "mapId": 11,
+    "isDefaultPosition": true,
+    "minSummonerLevel": 1,
+    "perkIds": [
+     8010,
+     9111,
+     9105,
+     8299,
+     8473,
+     8453,
+     5008,
+     5008,
+     5001
+    ],
+    "primaryPerkStyleId": 8000,
+    "secondaryPerkStyleId": 8400,
+    "summonerSpellIds": [
+     4,
+     14
+    ],
+    "recommendationId": "2026-03-16.000516"
+   },
+   {
+    "position": "TOP",
+    "mapId": 11,
+    "isDefaultPosition": true,
+    "minSummonerLevel": 1,
+    "perkIds": [
+     8010,
+     9111,
+     9105,
+     8299,
+     8139,
+     8135,
+     5008,
+     5008,
+     5001
+    ],
+    "primaryPerkStyleId": 8000,
+    "secondaryPerkStyleId": 8100,
+    "summonerSpellIds": [
+     4,
+     14
+    ],
+    "recommendationId": "2026-03-16.000517"
+   }
+  ]
+ },
+ {
+  "championId": 103,
+  "isOverride": false,
+  "runeRecommendations": [
+   {
+    "position": "NONE",
+    "mapId": 12,
+    "isDefaultPosition": true,
+    "minSummonerLevel": 1,
+    "perkIds": [
+     8128,
+     8126,
+     8140,
+     8106,
+     8014,
+     8009,
+     5008,
+     5008,
+     5001
+    ],
+    "primaryPerkStyleId": 8100,
+    "secondaryPerkStyleId": 8000,
+    "summonerSpellIds": [
+     4,
+     32
+    ],
+    "recommendationId": "2026-03-15.000003"
+   },
+   {
+    "position": "NONE",
+    "mapId": 12,
+    "isDefaultPosition": true,
+    "minSummonerLevel": 1,
+    "perkIds": [
+     8112,
+     8143,
+     8140,
+     8106,
+     8226,
+     8210,
+     5008,
+     5008,
+     5001
+    ],
+    "primaryPerkStyleId": 8100,
+    "secondaryPerkStyleId": 8200,
+    "summonerSpellIds": [
+     4,
+     32
+    ],
+    "recommendationId": "2026-03-15.000004"
+   },
+   {
+    "position": "NONE",
+    "mapId": 12,
+    "isDefaultPosition": true,
+    "minSummonerLevel": 1,
+    "perkIds": [
+     8112,
+     8126,
+     8140,
+     8106,
+     8014,
+     8009,
+     5008,
+     5008,
+     5001
+    ],
+    "primaryPerkStyleId": 8100,
+    "secondaryPerkStyleId": 8000,
+    "summonerSpellIds": [
+     4,
+     32
+    ],
+    "recommendationId": "2026-03-15.000005"
+   },
+   {
+    "position": "MIDDLE",
+    "mapId": 11,
+    "isDefaultPosition": true,
+    "minSummonerLevel": 1,
+    "perkIds": [
+     8112,
+     8139,
+     8140,
+     8106,
+     8226,
+     8210,
+     5005,
+     5008,
+     5001
+    ],
+    "primaryPerkStyleId": 8100,
+    "secondaryPerkStyleId": 8200,
+    "summonerSpellIds": [
+     4,
+     12
+    ],
+    "recommendationId": "2026-03-15.000518"
+   },
+   {
+    "position": "MIDDLE",
+    "mapId": 11,
+    "isDefaultPosition": true,
+    "minSummonerLevel": 1,
+    "perkIds": [
+     8112,
+     8139,
+     8140,
+     8106,
+     8345,
+     8347,
+     5005,
+     5008,
+     5001
+    ],
+    "primaryPerkStyleId": 8100,
+    "secondaryPerkStyleId": 8300,
+    "summonerSpellIds": [
+     4,
+     12
+    ],
+    "recommendationId": "2026-03-15.000519"
+   },
+   {
+    "position": "MIDDLE",
+    "mapId": 11,
+    "isDefaultPosition": true,
+    "minSummonerLevel": 1,
+    "perkIds": [
+     8214,
+     8226,
+     8210,
+     8237,
+     8345,
+     8347,
+     5005,
+     5008,
+     5001
+    ],
+    "primaryPerkStyleId": 8200,
+    "secondaryPerkStyleId": 8300,
+    "summonerSpellIds": [
+     4,
+     12
+    ],
+    "recommendationId": "2026-03-15.000520"
+   }
+  ]
+ }
+]

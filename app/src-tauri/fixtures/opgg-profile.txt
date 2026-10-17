@@ -1,0 +1,9 @@
+class LolGetSummonerProfile: data
+class Data: summoner
+class Summoner: game_name,tagline,level,league_stats,most_champions
+class LeagueStat: game_type,tier_info,win,lose
+class TierInfo: tier,division,lp
+class MostChampions: champion_stats
+class ChampionStat: play,win,champion_name
+
+LolGetSummonerProfile(Data(Summoner("Hide on bush","KR1",946,[LeagueStat("SOLORANKED",TierInfo("CHALLENGER",1,2256),448,371),LeagueStat("FLEXRANKED",TierInfo(null,null,null),null,null),LeagueStat("ARENA",TierInfo(null,null,null),null,null)],MostChampions([ChampionStat(63,31,"Yone"),ChampionStat(56,33,"Aurora"),ChampionStat(52,31,"Ryze"),ChampionStat(45,30,"Anivia"),ChampionStat(42,23,"Cassiopeia"),ChampionStat(37,22,"Orianna"),ChampionStat(36,21,"Akali"),ChampionStat(35,24,"Locke"),ChampionStat(29,12,"LeBlanc"),ChampionStat(26,18,"Annie")]))))
