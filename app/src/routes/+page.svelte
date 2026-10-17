@@ -161,7 +161,7 @@
         <path d="M7.6 15.6 15.9 7.3" stroke="url(#lg)" stroke-width="1.6" stroke-linecap="round" />
         <path d="M10.4 17.1 17 10.5" stroke="#3fb7c4" stroke-width="1.6" stroke-linecap="round" />
       </svg>
-      <span class="wordmark">Rift <b>Helper</b></span>
+      <span class="wordmark">Lock<b>in</b></span>
     </div>
     <div class="pill {view}" title={connected ? `League client connected${status?.region ? ` · ${status.region}` : ""}` : "Waiting for the League client"}>
       <span class="pdot"></span>{pill}

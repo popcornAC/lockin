@@ -86,7 +86,7 @@ const ownDuo: PartyTag = { id: 0, size: 2, likely: false, games: null };
 const likely = (id: number, size: number, games: number): PartyTag => ({ id, size, likely: true, games });
 
 const me = () =>
-  player("Arik#EUW", "Ahri", "ORDER", profile(rank("EMERALD", 2, 61, 118, 97), [["Ahri", 88, 51], ["Syndra", 41, 22], ["Orianna", 19, 9]]), {
+  player("Summoner#EUW", "Ahri", "ORDER", profile(rank("EMERALD", 2, 61, 118, 97), [["Ahri", 88, 51], ["Syndra", 41, 22], ["Orianna", 19, 9]]), {
     is_self: true,
   });
 

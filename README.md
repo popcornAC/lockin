@@ -1,6 +1,23 @@
-# Lockin
+<h1 align="center">Lockin</h1>
 
-A lean, ad-free League of Legends companion for Windows and macOS. It sits in your tray and does nothing until the League client starts.
+<p align="center">
+  A lean, ad-free League of Legends companion for Windows and macOS.<br>
+  It sits in your tray and does nothing until the League client starts.
+</p>
+
+<p align="center">
+  <a href="https://github.com/popcornAC/lockin/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/popcornAC/lockin?color=c8aa6e"></a>
+  <a href="https://github.com/popcornAC/lockin/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/popcornAC/lockin/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-0ac8b9"></a>
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/champ-select.png" width="32%" alt="Champ select: imported OP.GG build with runes, spells, items and skill order">
+  <img src="docs/screenshots/in-game.png" width="32%" alt="In game: all 10 players with rank, win rate, top champions and premade markers">
+  <img src="docs/screenshots/settings.png" width="32%" alt="Settings: auto-accept, auto-import, rank filter and player lookup toggles">
+</p>
+
+## Features
 
 - **Auto-accept** ready checks (off by default)
 - **Champ select auto-import** of runes, summoner spells and an item set from OP.GG builds, falling back to the client's own recommendations
