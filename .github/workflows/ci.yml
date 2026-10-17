@@ -20,6 +20,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Windows: skip Defender's real-time scanning and put cargo's target dir on
+      # a ReFS Dev Drive. NTFS + Defender is the main reason Windows builds are slow.
+      - name: Disable Defender real-time scanning
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: Set-MpPreference -DisableRealtimeMonitoring $true
+
+      - uses: samypr100/setup-dev-drive@v4
+        if: runner.os == 'Windows'
+        with:
+          drive-size: 12GB
+          trusted-dev-drive: true
+          mount-path: ${{ github.workspace }}/app/src-tauri/target
+
       # pnpm version comes from "packageManager" in app/package.json.
       - uses: pnpm/action-setup@v4
         with:

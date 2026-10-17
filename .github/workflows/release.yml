@@ -19,7 +19,8 @@ jobs:
       matrix:
         include:
           - os: windows-latest
-            args: ''
+            # NSIS .exe installer only; the MSI needs WiX and adds build time.
+            args: '--bundles nsis'
           - os: macos-latest
             args: '--target aarch64-apple-darwin'
           - os: macos-latest
@@ -27,6 +28,20 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+
+      # Windows: skip Defender's real-time scanning and put cargo's target dir on
+      # a ReFS Dev Drive. NTFS + Defender is the main reason Windows builds are slow.
+      - name: Disable Defender real-time scanning
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: Set-MpPreference -DisableRealtimeMonitoring $true
+
+      - uses: samypr100/setup-dev-drive@v4
+        if: runner.os == 'Windows'
+        with:
+          drive-size: 12GB
+          trusted-dev-drive: true
+          mount-path: ${{ github.workspace }}/app/src-tauri/target
 
       - uses: pnpm/action-setup@v4
         with:
@@ -57,7 +72,7 @@ jobs:
           projectPath: app
           tagName: ${{ github.ref_type == 'tag' && github.ref_name || 'v__VERSION__' }}
           releaseName: Lockin ${{ github.ref_type == 'tag' && github.ref_name || 'v__VERSION__' }}
-          releaseBody: Windows installer (.exe / .msi) and macOS builds (.dmg, aarch64 = Apple Silicon, x64 = Intel).
+          releaseBody: Windows installer (.exe) and macOS builds (.dmg, aarch64 = Apple Silicon, x64 = Intel).
           releaseDraft: false
           prerelease: false
           args: ${{ matrix.args }}
