@@ -1,6 +1,7 @@
-<!-- The Settings tab: toggles, rank filter, refresh builds, connection info, log. -->
+<!-- The Settings tab: toggles, rank filter, refresh builds, connection info, updates, log. -->
 <script lang="ts">
   import type { Settings, Status } from "$lib/types";
+  import { installBlocked, type Updater } from "$lib/updater.svelte";
   import Toggle from "./Toggle.svelte";
 
   let {
@@ -9,13 +10,18 @@
     tiers,
     save,
     refreshBuilds,
+    updater,
   }: {
     settings: Settings;
     status: Status | null;
     tiers: [string, string][];
     save: () => void;
     refreshBuilds: () => Promise<void>;
+    updater: Updater;
   } = $props();
+
+  let up = $derived(updater.state);
+  let blocked = $derived(installBlocked(status?.phase));
 
   let refreshing = $state(false);
   let tierLabel = $derived(tiers.find(([v]) => v === settings.opgg_tier)?.[1] ?? "");
@@ -102,6 +108,41 @@
           </span>
         </div>
       {/if}
+      <div class="field source update">
+        <span class="src">
+          <b class="ver">Lockin {updater.version ?? ""}</b><br />
+          {#if up.kind === "checking"}
+            <span class="then">Checking for updates…</span>
+          {:else if up.kind === "current"}
+            <span class="then">Up to date</span>
+          {:else if up.kind === "available"}
+            <span class="new">Version {up.version} is available</span>
+            {#if blocked}<br /><span class="then">{blocked}</span>{/if}
+          {:else if up.kind === "installing"}
+            <span class="new">
+              {up.progress === null || up.progress < 1 ? "Downloading" : "Installing"} {up.version}{up.progress !== null && up.progress < 1
+                ? ` · ${Math.round(up.progress * 100)}%`
+                : "…"}
+            </span>
+          {:else if up.kind === "error"}
+            <span class="err" title={up.message}>Couldn't update: {up.message}</span>
+          {:else}
+            <span class="then">Updates install only when you choose</span>
+          {/if}
+        </span>
+        {#if up.kind === "available" || up.kind === "installing"}
+          <button class="btn" onclick={() => updater.install()} disabled={!!blocked || up.kind === "installing"} title={blocked ?? ""}>
+            Install and restart
+          </button>
+        {:else}
+          <button class="btn" onclick={() => updater.check()} disabled={up.kind === "checking"}>
+            <svg viewBox="0 0 16 16" aria-hidden="true" class:spin={up.kind === "checking"}
+              ><path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9M13.5 2.5v3h-3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg
+            >
+            Check for updates
+          </button>
+        {/if}
+      </div>
     </div>
   </section>
 
@@ -203,6 +244,21 @@
   }
   .then {
     color: var(--faint);
+  }
+  .update .ver {
+    color: var(--text-2);
+  }
+  .new {
+    color: var(--gold-bright);
+  }
+  .err {
+    display: inline-block;
+    max-width: 210px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: bottom;
+    color: var(--bad);
   }
   .btn {
     flex: none;

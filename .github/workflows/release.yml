@@ -1,7 +1,12 @@
 # Builds installers for Windows and macOS (Apple Silicon + Intel) and attaches
 # them to a GitHub release. Trigger by pushing a tag, e.g.:
 #   git tag v0.1.0 && git push origin v0.1.0
-# Bump "version" in app/src-tauri/tauri.conf.json and app/package.json first.
+# Bump "version" in app/src-tauri/tauri.conf.json, Cargo.toml and app/package.json first.
+#
+# Updater artifacts (.app.tar.gz, setup .exe) are signed with the updater key in
+# the TAURI_SIGNING_PRIVATE_KEY secret (TAURI_SIGNING_PRIVATE_KEY_PASSWORD is
+# unset: the key has no password). Each build job merges its platform into the
+# release's latest.json, which the in-app updater reads.
 name: release
 
 on:
@@ -64,10 +69,12 @@ jobs:
       - run: pnpm install --frozen-lockfile
         working-directory: app
 
-      # Builds are unsigned (personal use). See plans/releases.md for first-launch steps.
+      # Installers aren't code signed (personal use); only the updater artifacts are.
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
           projectPath: app
           tagName: ${{ github.ref_type == 'tag' && github.ref_name || 'v__VERSION__' }}
@@ -75,4 +82,38 @@ jobs:
           releaseBody: Windows installer (.exe) and macOS builds (.dmg, aarch64 = Apple Silicon, x64 = Intel).
           releaseDraft: false
           prerelease: false
+          includeUpdaterJson: true
           args: ${{ matrix.args }}
+
+  # The build jobs update latest.json read-modify-write, so two finishing at the
+  # same moment can drop a platform. Re-add any platform that's missing or stale
+  # from the release's own assets, then fail if anything is still wrong.
+  latest-json:
+    needs: build
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPO: ${{ github.repository }}
+      TAG: ${{ github.ref_name }}
+    steps:
+      - name: Check and repair latest.json
+        run: |
+          set -euo pipefail
+          mkdir dl && cd dl
+          gh release download "$TAG" -p latest.json -p '*.sig'
+          names=$(gh release view "$TAG" --json assets -q '.assets[].name')
+          cp latest.json before.json
+          for p in darwin-aarch64:_aarch64.app.tar.gz darwin-x86_64:_x64.app.tar.gz windows-x86_64:_x64-setup.exe; do
+            key=${p%%:*}
+            file=$(grep -- "${p#*:}\$" <<<"$names")
+            url="https://github.com/$GH_REPO/releases/download/$TAG/$file"
+            jq --arg k "$key" --arg u "$url" --rawfile s "$file.sig" \
+              '.platforms[$k] = {signature: $s, url: $u}' latest.json > tmp.json && mv tmp.json latest.json
+          done
+          jq -e --arg v "${TAG#v}" '.version == $v' latest.json
+          if ! cmp -s <(jq -S . before.json) <(jq -S . latest.json); then
+            echo "latest.json was missing or had a stale platform entry; re-uploading"
+            gh release upload "$TAG" latest.json --clobber
+          fi
+          jq '.platforms | map_values(.url)' latest.json

@@ -1,6 +1,7 @@
 // Dev-only mock backend (see backend.ts). Pick a state with `?mock=<state>`:
 // disconnected | idle | lobby | queue | hover | champselect | importing |
 // unsupported | ingame. Icon tables are built from live Data Dragon data.
+// Add `&update=0.9.0` (or `&update=error`) to preview the updater (updater.svelte.ts).
 
 import type { Backend } from "./backend";
 import type { GameAssets, ImportReport, PartyTag, PlayerView, Profile, Rank, Settings, Status } from "./types";

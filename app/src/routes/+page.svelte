@@ -7,6 +7,7 @@
   import Img from "$lib/components/Img.svelte";
   import Players from "$lib/components/Players.svelte";
   import SettingsPanel from "$lib/components/SettingsPanel.svelte";
+  import { Updater } from "$lib/updater.svelte";
 
   let backend: Backend | null = null;
   let status = $state<Status | null>(null);
@@ -18,9 +19,10 @@
   let toast = $state<{ text: string; error: boolean } | null>(null);
   let toastTimer: ReturnType<typeof setTimeout> | undefined;
   let splashFailed = $state<string | null>(null);
+  const updater = new Updater();
 
   onMount(() => {
-    const off: Promise<() => void>[] = [];
+    const off: Promise<() => void>[] = [Promise.resolve(updater.start())];
     if (new URLSearchParams(location.search).get("tab") === "settings") tab = "settings";
     getBackend().then((b) => {
       backend = b;
@@ -163,6 +165,9 @@
       </svg>
       <span class="wordmark">Lock<b>in</b></span>
     </div>
+    {#if updater.state.kind === "available" || updater.state.kind === "installing"}
+      <button class="update" title="Version {updater.state.version} is ready to install" onclick={() => (tab = "settings")}>Update available</button>
+    {/if}
     <div class="pill {view}" title={connected ? `League client connected${status?.region ? ` · ${status.region}` : ""}` : "Waiting for the League client"}>
       <span class="pdot"></span>{pill}
     </div>
@@ -177,7 +182,7 @@
   <main>
     {#if tab === "settings"}
       {#if settings}
-        <SettingsPanel bind:settings {status} {tiers} {save} {refreshBuilds} />
+        <SettingsPanel bind:settings {status} {tiers} {save} {refreshBuilds} {updater} />
       {/if}
     {:else if !status}
       <div class="empty"><span class="spinner" aria-label="Loading"></span></div>
@@ -376,6 +381,23 @@
   .wordmark b {
     color: var(--gold-bright);
     font-weight: 700;
+  }
+  .update {
+    margin-left: auto;
+    padding: 2px 8px;
+    border: none;
+    border-radius: 999px;
+    font: inherit;
+    font-size: 11px;
+    color: var(--gold-bright);
+    background: var(--gold-wash);
+    box-shadow: inset 0 0 0 1px var(--gold-line);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: box-shadow 0.15s;
+  }
+  .update:hover {
+    box-shadow: inset 0 0 0 1px var(--gold);
   }
   .pill {
     display: inline-flex;

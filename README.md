@@ -35,6 +35,8 @@ The builds are unsigned:
 - **Windows:** on the SmartScreen prompt, click **More info → Run anyway**.
 - **macOS:** after moving the app to Applications, run `xattr -cr /Applications/Lockin.app`, then open it.
 
+From v0.2.0 on, Lockin updates itself: Settings → **Check for updates**, then **Install and restart**.
+
 ## Build from source
 
 You need Rust (stable), Node 22 and pnpm. On Windows you also need the MSVC Build Tools and WebView2.
