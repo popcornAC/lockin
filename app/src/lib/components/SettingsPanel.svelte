@@ -110,7 +110,7 @@
       {/if}
       <div class="field source update">
         <span class="src">
-          <b class="ver">Lockin {updater.version ?? ""}</b><br />
+          <b class="ver">Lockin{updater.version ? ` ${updater.version}` : ""}</b><br />
           {#if up.kind === "checking"}
             <span class="then">Checking for updates…</span>
           {:else if up.kind === "current"}
@@ -127,7 +127,7 @@
           {:else if up.kind === "error"}
             <span class="err" title={up.message}>Couldn't update: {up.message}</span>
           {:else}
-            <span class="then">Updates install only when you choose</span>
+            <span class="then">Updates only install when you click</span>
           {/if}
         </span>
         {#if up.kind === "available" || up.kind === "installing"}
