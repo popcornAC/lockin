@@ -2,7 +2,7 @@
 // outside Tauri (a plain browser), a mock backend is used instead so every UI
 // state can be previewed; it is never part of a production build.
 
-import type { GameAssets, Settings, Status } from "./types";
+import type { GameAssets, GameRecord, GamesView, Settings, Status } from "./types";
 
 type Unlisten = () => void;
 
@@ -14,9 +14,15 @@ export interface Backend {
   getAssets(): Promise<GameAssets | null>;
   applyNow(): Promise<void>;
   refreshBuilds(): Promise<void>;
+  getGames(): Promise<GamesView>;
+  /** One stored game, read from disk on demand. */
+  getGame(id: string): Promise<GameRecord | null>;
+  /** Backfill from OP.GG (skipped if one just ran, unless forced). */
+  refreshGames(force: boolean): Promise<void>;
   on(event: "status", cb: (s: Status) => void): Promise<Unlisten>;
   on(event: "settings", cb: (s: Settings) => void): Promise<Unlisten>;
   on(event: "assets", cb: (a: GameAssets) => void): Promise<Unlisten>;
+  on(event: "games", cb: (g: GamesView) => void): Promise<Unlisten>;
 }
 
 async function tauriBackend(): Promise<Backend> {
@@ -30,6 +36,9 @@ async function tauriBackend(): Promise<Backend> {
     getAssets: () => invoke("get_assets"),
     applyNow: () => invoke("apply_now"),
     refreshBuilds: () => invoke("refresh_builds"),
+    getGames: () => invoke("get_games"),
+    getGame: (id) => invoke("get_game", { id }),
+    refreshGames: (force) => invoke("refresh_games", { force }),
     on: (event: string, cb: (p: never) => void) => listen(event, (e) => cb(e.payload as never)),
   };
 }

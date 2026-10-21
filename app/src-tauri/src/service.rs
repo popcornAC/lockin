@@ -14,6 +14,7 @@ use tauri::{AppHandle, Emitter};
 use tauri_plugin_autostart::ManagerExt;
 
 use crate::assets::{self, GameAssets};
+use crate::games::{self, Account, Games, GamesView, Pending};
 use crate::import::client_recs::{ClientRecommendations, default_position};
 use crate::import::source::{BuildContext, BuildQuery, BuildSource, position_label};
 use crate::import::{self, ImportReport, Parts};
@@ -22,6 +23,7 @@ use crate::lcu::discovery::Discovery;
 use crate::lcu::ws::{self, LcuEvent};
 use crate::lcu::{LcuClient, LiveClient, TlsMode};
 use crate::opgg::builds::OpggSource;
+use crate::opgg::games::GameRecord;
 use crate::opgg::profile::opgg_region;
 use crate::players::{self, Lookup, PlayerView};
 use crate::premades;
@@ -68,6 +70,8 @@ struct ChampSelectTracker {
     last_applied: Option<(i64, String)>,
     prefetched: HashSet<i64>,
     looked_up: HashSet<String>,
+    /// Your locked champion, for matching the finished game on OP.GG.
+    my_champion: i64,
 }
 
 /// One player to look up.
@@ -109,6 +113,10 @@ pub struct Service {
     data_dir: PathBuf,
     /// Icon lookup tables for the window (see [`assets`]).
     assets: Mutex<Option<GameAssets>>,
+    /// Post-game stats store and OP.GG sync.
+    games: Games,
+    /// Client game ids whose end of game was already handled.
+    ended: Mutex<HashSet<i64>>,
 }
 
 fn now_hms() -> String {
@@ -154,7 +162,7 @@ impl Service {
             lcu: Mutex::new(None),
             opgg,
             client_recs: Arc::new(ClientRecommendations::new(http.clone())),
-            http,
+            http: http.clone(),
             champions: Mutex::new(HashMap::new()),
             cs: Mutex::new(ChampSelectTracker::default()),
             lookup: Lookup::default(),
@@ -163,8 +171,10 @@ impl Service {
             inferred: Mutex::new(Vec::new()),
             last_accept: Mutex::new(None),
             phase_gen: AtomicU64::new(0),
+            games: Games::new(http.clone(), &data_dir),
             data_dir,
             assets: Mutex::new(None),
+            ended: Mutex::new(HashSet::new()),
         })
     }
 
@@ -244,6 +254,11 @@ impl Service {
     pub async fn run(self: Arc<Self>) {
         let me = self.clone();
         tauri::async_runtime::spawn(async move { me.refresh_patch().await });
+        // Games played while Lockin was closed, and games still waiting for OP.GG.
+        for p in self.games.store.pending() {
+            self.clone().spawn_retry(p);
+        }
+        self.clone().refresh_games(false);
 
         let mut disc = Discovery::default();
         loop {
@@ -370,7 +385,20 @@ impl Service {
             self.update(|s| s.patch = Some(p));
         }
         let region = api::region(&c).await.and_then(|r| opgg_region(&r));
-        self.update(|s| s.region = region);
+        self.update(|s| s.region = region.clone());
+        if let (Some(region), Ok(Some((game_name, tag_line)))) =
+            (region, api::current_summoner(&c).await.map(|s| s.riot_id))
+        {
+            let changed = self.games.store.set_account(Account {
+                game_name,
+                tag_line,
+                region,
+            });
+            if changed {
+                self.emit_games();
+            }
+            self.clone().refresh_games(false);
+        }
         let phase = api::gameflow_phase(&c)
             .await
             .unwrap_or_else(|_| "None".into());
@@ -445,6 +473,11 @@ impl Service {
                         me.live_game_lookup(generation, tls).await
                     });
                 }
+            }
+            "PreEndOfGame" | "WaitingForStats" | "EndOfGame" => {
+                let me = self.clone();
+                let c = c.clone();
+                tauri::async_runtime::spawn(async move { me.on_game_end(c).await });
             }
             "None" | "Lobby" | "Matchmaking" => {
                 if phase == "None" {
@@ -524,6 +557,9 @@ impl Service {
             return;
         };
         let (map_id, queue_id) = self.map_queue(c, sel.game_id).await;
+        if sel.is_locked() {
+            self.cs.lock().unwrap().my_champion = sel.locked_champion;
+        }
         let champ = sel.current_champion();
         let name = self
             .champion_info(c, champ)
@@ -989,6 +1025,153 @@ impl Service {
                 Err(_) => {}
             }
             tokio::time::sleep(Duration::from_secs(3)).await;
+        }
+    }
+
+    // ---------- post-game stats ----------
+
+    pub fn games_view(&self) -> GamesView {
+        self.games.view()
+    }
+
+    pub fn game(&self, id: &str) -> Option<GameRecord> {
+        self.games.store.get(id)
+    }
+
+    fn emit_games(&self) {
+        let _ = self.app.emit("games", self.games.view());
+    }
+
+    /// Backfill recent games from OP.GG (on start, on connect and when the
+    /// Games tab opens). Skipped if one just ran, unless `force`.
+    pub fn refresh_games(self: Arc<Self>, force: bool) {
+        let Some(acct) = self.games.store.account() else {
+            return;
+        };
+        if !force && self.games.recently_synced(&acct) {
+            return;
+        }
+        tauri::async_runtime::spawn(async move {
+            let _ = self.sync_games(&acct).await;
+        });
+    }
+
+    async fn sync_games(&self, acct: &Account) -> Result<(), String> {
+        *self.games.syncing.lock().unwrap() = true;
+        self.emit_games();
+        let r = self.games.sync(acct, || self.emit_games()).await;
+        *self.games.syncing.lock().unwrap() = false;
+        let out = match r {
+            Ok(added) => {
+                *self.games.error.lock().unwrap() = None;
+                if added > 0 {
+                    self.log(format!("Post-game: {added} game(s) loaded from OP.GG"));
+                }
+                Ok(())
+            }
+            Err(e) => {
+                *self.games.error.lock().unwrap() = Some(e.clone());
+                Err(e)
+            }
+        };
+        self.emit_games();
+        out
+    }
+
+    /// Look for a just-finished game on OP.GG with backoff until it shows up.
+    fn spawn_retry(self: Arc<Self>, p: Pending) {
+        tauri::async_runtime::spawn(async move {
+            for (n, after) in games::RETRY_AFTER_MIN.iter().enumerate() {
+                let now = time::OffsetDateTime::now_utc().unix_timestamp();
+                let wait = p.ended_at + after * 60 - now;
+                let last = n + 1 == games::RETRY_AFTER_MIN.len();
+                if wait > 0 {
+                    tokio::time::sleep(Duration::from_secs(wait as u64)).await;
+                } else if !last {
+                    // Restarted late: skip tries already overdue, keep one.
+                    let next = p.ended_at + games::RETRY_AFTER_MIN[n + 1] * 60;
+                    if next <= now {
+                        continue;
+                    }
+                }
+                if !self.games.store.is_pending(p.lcu_game_id) {
+                    return;
+                }
+                let _ = self.sync_games(&p.account).await;
+                if !self.games.store.is_pending(p.lcu_game_id) {
+                    return;
+                }
+            }
+            self.games.store.remove_pending(p.lcu_game_id);
+            self.log("Post-game: OP.GG didn't have the last game after 45 min; it will show up on a later refresh");
+            self.emit_games();
+        });
+    }
+
+    /// End of game: remember the game for OP.GG, and keep a raw copy of the
+    /// client's end-of-game stats for later. Nothing is shown or brought to front.
+    async fn on_game_end(self: Arc<Self>, c: Arc<LcuClient>) {
+        let Ok(session) = c.get("/lol-gameflow/v1/session").await else {
+            return;
+        };
+        let game_id = session["gameData"]["gameId"].as_i64().unwrap_or(0);
+        if game_id <= 0 || !self.ended.lock().unwrap().insert(game_id) {
+            return;
+        }
+        let (map_id, queue_id) = api::parse_map_queue(&session);
+        let custom = session["gameData"]["isCustomGame"].as_bool() == Some(true);
+        let supported = map_id == Some(11)
+            && !custom
+            && queue_id.is_some_and(|q| games::SR_QUEUES.contains(&q));
+        if supported {
+            let region = self.status.lock().unwrap().region.clone();
+            let riot_id = api::current_summoner(&c).await.ok().and_then(|s| s.riot_id);
+            if let (Some(region), Some((game_name, tag_line))) = (region, riot_id) {
+                let champion_id = {
+                    let cs = self.cs.lock().unwrap();
+                    (cs.game_id == game_id && cs.my_champion > 0).then_some(cs.my_champion)
+                };
+                let account = Account {
+                    game_name,
+                    tag_line,
+                    region,
+                };
+                self.games.store.set_account(account.clone());
+                let p = Pending {
+                    lcu_game_id: game_id,
+                    ended_at: time::OffsetDateTime::now_utc().unix_timestamp(),
+                    queue_id,
+                    champion_id,
+                    account,
+                };
+                if self.games.store.add_pending(p.clone()) {
+                    self.log(
+                        "Post-game: game recorded; stats will load from OP.GG in a few minutes",
+                    );
+                    self.emit_games();
+                    self.clone().spawn_retry(p);
+                }
+            }
+        }
+        // Opportunistic: the client's own end-of-game block, saved raw for a
+        // future switch to the local source. Never fails the flow above.
+        for _ in 0..12 {
+            if let Ok(v) = c.get("/lol-end-of-game/v1/eog-stats-block").await
+                && v.is_object()
+                && v.get("errorCode").is_none()
+            {
+                let id = v["gameId"].as_i64().filter(|i| *i > 0).unwrap_or(game_id);
+                let dir = self.data_dir.clone();
+                let _ = tauri::async_runtime::spawn_blocking(move || {
+                    games::save_eog_dump(&dir, id, &v)
+                })
+                .await;
+                self.log(format!(
+                    "Saved end-of-game stats block for game {id} (debug)"
+                ));
+                return;
+            }
+            tokio::time::sleep(Duration::from_secs(5)).await;
         }
     }
 }

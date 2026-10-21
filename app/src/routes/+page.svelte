@@ -2,20 +2,25 @@
   import { onMount } from "svelte";
   import { getBackend, type Backend } from "$lib/backend";
   import { championIcon, championSplash, POSITION_LABELS, positionIcon } from "$lib/assets";
-  import type { GameAssets, Settings, Status } from "$lib/types";
+  import type { GameAssets, GamesView, Settings, Status } from "$lib/types";
   import BuildView from "$lib/components/BuildView.svelte";
+  import Games from "$lib/components/Games.svelte";
   import Img from "$lib/components/Img.svelte";
   import Players from "$lib/components/Players.svelte";
   import SettingsPanel from "$lib/components/SettingsPanel.svelte";
   import { Updater } from "$lib/updater.svelte";
 
   let backend: Backend | null = null;
+  const backendReady = getBackend();
   let status = $state<Status | null>(null);
   let settings = $state<Settings | null>(null);
   let assets = $state<GameAssets | null>(null);
   let tiers = $state<[string, string][]>([]);
   let busy = $state(false);
-  let tab = $state<"live" | "settings">("live");
+  let games = $state<GamesView | null>(null);
+  let tab = $state<"live" | "games" | "settings">("live");
+  /** Dev / screenshots: `?tab=games&game=<id>` opens a game directly. */
+  let initialGame = $state<string | null>(null);
   let toast = $state<{ text: string; error: boolean } | null>(null);
   let toastTimer: ReturnType<typeof setTimeout> | undefined;
   let splashFailed = $state<string | null>(null);
@@ -23,14 +28,20 @@
 
   onMount(() => {
     const off: Promise<() => void>[] = [Promise.resolve(updater.start())];
-    if (new URLSearchParams(location.search).get("tab") === "settings") tab = "settings";
-    getBackend().then((b) => {
+    const q = new URLSearchParams(location.search);
+    const t = q.get("tab");
+    if (t === "settings" || t === "games") tab = t;
+    initialGame = q.get("game");
+    backendReady.then((b) => {
       backend = b;
       b.getStatus().then((s) => (status = s));
       b.getSettings().then((s) => (settings = s));
       b.tiers().then((t) => (tiers = t));
       b.getAssets().then((a) => (assets = a ?? assets));
+      b.getGames().then((g) => (games = g));
+      if (tab === "games") b.refreshGames(false);
       off.push(
+        b.on("games", (g) => (games = g)),
         b.on("status", (s) => (status = s)),
         b.on("settings", (s) => (settings = s)),
         b.on("assets", (a) => (assets = a)),
@@ -65,6 +76,12 @@
     } finally {
       busy = false;
     }
+  }
+
+  function openTab(t: typeof tab) {
+    tab = t;
+    // Quiet backfill of games played while Lockin was closed (throttled in Rust).
+    if (t === "games") backend?.refreshGames(false);
   }
 
   async function refreshBuilds() {
@@ -174,13 +191,24 @@
   </header>
 
   <div class="tabs" role="tablist">
-    <button role="tab" aria-selected={tab === "live"} onclick={() => (tab = "live")}>Live</button>
-    <button role="tab" aria-selected={tab === "settings"} onclick={() => (tab = "settings")}>Settings</button>
+    <button role="tab" aria-selected={tab === "live"} onclick={() => openTab("live")}>Live</button>
+    <button role="tab" aria-selected={tab === "games"} onclick={() => openTab("games")}
+      >Games{#if games?.pending.length}<span class="tab-dot" title="Fetching stats for your last game"></span>{/if}</button
+    >
+    <button role="tab" aria-selected={tab === "settings"} onclick={() => openTab("settings")}>Settings</button>
     {#if status?.patch}<span class="patch">Patch {status.patch}</span>{/if}
   </div>
 
   <main>
-    {#if tab === "settings"}
+    {#if tab === "games"}
+      <Games
+        view={games}
+        {assets}
+        initialId={initialGame}
+        loadGame={(id) => backendReady.then((b) => b.getGame(id))}
+        refresh={(force) => backendReady.then((b) => b.refreshGames(force))}
+      />
+    {:else if tab === "settings"}
       {#if settings}
         <SettingsPanel bind:settings {status} {tiers} {save} {refreshBuilds} {updater} />
       {/if}
@@ -484,6 +512,15 @@
     transition:
       opacity 0.2s,
       transform 0.2s;
+  }
+  .tab-dot {
+    display: inline-block;
+    width: 5px;
+    height: 5px;
+    margin-left: 5px;
+    border-radius: 50%;
+    vertical-align: 2px;
+    background: var(--teal);
   }
   .tabs button[aria-selected="true"] {
     color: var(--gold-bright);

@@ -2,6 +2,7 @@
 //! result is a compact text format parsed by [`textfmt`].
 
 pub mod builds;
+pub mod games;
 pub mod matches;
 pub mod profile;
 pub mod textfmt;

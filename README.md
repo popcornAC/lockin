@@ -23,6 +23,7 @@
 - **Champ select auto-import** of runes, summoner spells and an item set from OP.GG builds, falling back to the client's own recommendations
 - **Player lookup** with rank, win rate and top champions for visible players in champ select and all 10 players in game
 - **Premade markers** for your own party, plus likely duos inferred in game from recent match history
+- **Post-game stats** in a Games tab: your recent games, stat cards, lane comparison and a sortable 10-player scoreboard (from OP.GG, a few minutes after each game)
 
 Summoner's Rift only. No in-game overlay, no memory reading, no Riot API key needed.
 

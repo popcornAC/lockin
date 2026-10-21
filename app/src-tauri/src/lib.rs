@@ -1,6 +1,7 @@
 //! Lockin: a lean League of Legends companion (tray app).
 
 mod assets;
+mod games;
 mod import;
 mod lcu;
 mod opgg;
@@ -55,6 +56,26 @@ fn get_assets(svc: Svc) -> Option<assets::GameAssets> {
 }
 
 #[tauri::command]
+fn get_games(svc: Svc) -> games::GamesView {
+    svc.games_view()
+}
+
+#[tauri::command]
+async fn get_game(svc: Svc<'_>, id: String) -> Result<Option<opgg::games::GameRecord>, String> {
+    let svc = svc.inner().clone();
+    // Disk read off the main thread.
+    tauri::async_runtime::spawn_blocking(move || svc.game(&id))
+        .await
+        .map_err(|e| e.to_string())
+}
+
+/// The Games tab was opened (or its refresh button pressed).
+#[tauri::command]
+fn refresh_games(svc: Svc, force: bool) {
+    svc.inner().clone().refresh_games(force);
+}
+
+#[tauri::command]
 fn tiers() -> Vec<(&'static str, &'static str)> {
     opgg::builds::TIERS.to_vec()
 }
@@ -88,6 +109,9 @@ pub fn run() {
             apply_now,
             refresh_builds,
             get_assets,
+            get_games,
+            get_game,
+            refresh_games,
             tiers
         ])
         .setup(|app| {

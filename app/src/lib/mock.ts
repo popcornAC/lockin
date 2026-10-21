@@ -1,10 +1,25 @@
 // Dev-only mock backend (see backend.ts). Pick a state with `?mock=<state>`:
 // disconnected | idle | lobby | queue | hover | champselect | importing |
-// unsupported | ingame. Icon tables are built from live Data Dragon data.
+// unsupported | ingame | games | games-empty. Icon tables are built from live
+// Data Dragon data. Games tab: `?mock=games&tab=games` (add `&game=mock-1` to
+// open the post-game view).
 // Add `&update=0.9.0` (or `&update=error`) to preview the updater (updater.svelte.ts).
 
 import type { Backend } from "./backend";
-import type { GameAssets, ImportReport, PartyTag, PlayerView, Profile, Rank, Settings, Status } from "./types";
+import type {
+  GameAssets,
+  GameRecord,
+  GameSummary,
+  GamesView,
+  ImportReport,
+  PartyTag,
+  PlayerRecord,
+  PlayerView,
+  Profile,
+  Rank,
+  Settings,
+  Status,
+} from "./types";
 
 const TIERS: [string, string][] = [
   ["all", "All ranks"],
@@ -169,6 +184,109 @@ function status(state: string): Status {
   }
 }
 
+
+// ---------- Games tab ----------
+
+const NOW = Math.floor(Date.now() / 1000);
+
+type Row = [string, string, string, number, string, number, [number, number, number], number, number, number, number, number, number[], number[], [number, number, number], number, number];
+// riot id, side, position, champion id, name, level, k/d/a, cs, gold, damage, taken, wards, items, spells, [primary, keystone, sub], op score, op rank
+const BOARD: Row[] = [
+  ["Thornwood#EUW", "BLUE", "top", 86, "Garen", 16, [6, 5, 4], 212, 12950, 21480, 31200, 7, [3071, 3047, 6333, 3053, 1031], [12, 4], [8000, 8010, 8400], 5.9, 6],
+  ["Lantern Moth#2207", "BLUE", "jungle", 64, "Lee Sin", 15, [5, 6, 11], 168, 11820, 14310, 27900, 9, [6692, 3111, 3071, 3053], [11, 4], [8000, 8010, 8300], 6.4, 5],
+  ["Summoner#EUW", "BLUE", "middle", 103, "Ahri", 17, [9, 3, 8], 241, 13870, 28640, 16520, 11, [6655, 3020, 4645, 3157, 3089, 2055], [4, 14], [8100, 8112, 8200], 8.7, 2],
+  ["quietstorm#0001", "BLUE", "bottom", 222, "Jinx", 16, [11, 4, 6], 268, 15120, 30210, 15340, 10, [6672, 3006, 3031, 3094, 3036], [7, 4], [8000, 8008, 8200], 9.2, 1],
+  ["Pebble#EUW", "BLUE", "utility", 412, "Thresh", 13, [1, 5, 22], 38, 8120, 6830, 21070, 41, [3869, 3117, 3190, 3109, 2055], [14, 4], [8400, 8439, 8300], 7.1, 4],
+  ["Vortex Seven#777", "RED", "top", 897, "K'Sante", 15, [3, 6, 5], 198, 10910, 15720, 34110, 6, [3068, 3047, 3075, 3065], [12, 4], [8400, 8437, 8000], 4.8, 8],
+  ["NightOwl#4413", "RED", "jungle", 254, "Vi", 15, [6, 7, 6], 161, 11240, 17880, 28400, 8, [6692, 3111, 3071, 6610], [11, 4], [8000, 8010, 8300], 5.2, 7],
+  ["Sora#EUW", "RED", "middle", 134, "Syndra", 16, [7, 6, 4], 226, 12300, 24910, 15010, 9, [6655, 3020, 4645, 3089], [4, 14], [8200, 8229, 8000], 7.3, 3],
+  ["bluefinch#EUW", "RED", "bottom", 21, "Miss Fortune", 15, [4, 8, 5], 239, 11650, 19050, 17200, 8, [6676, 3047, 3508, 3036], [7, 4], [8000, 8021, 8200], 4.1, 9],
+  ["Ghostlight#9001", "RED", "utility", 111, "Nautilus", 12, [0, 5, 13], 31, 7350, 8130, 25200, 34, [3870, 3111, 3190, 2055], [14, 4], [8400, 8439, 8300], 3.6, 10],
+];
+
+function mockPlayer(r: Row): PlayerRecord {
+  const [riot_id, side, position, champion_id, champion, level, [kills, deaths, assists], cs, gold, damage, damage_taken, wards_placed, items, spells, [primary_style, keystone, sub_style], op_score, op_rank] = r;
+  return {
+    riot_id, side, position, champion_id, champion, level, kills, deaths, assists, cs, gold, damage, damage_taken, wards_placed,
+    control_wards: position === "utility" ? 9 : 2,
+    largest_multi_kill: kills > 8 ? 3 : 1,
+    items,
+    role_item: { top: 1221, jungle: 1209, middle: 1206, bottom: 1207, utility: null }[position] ?? null,
+    spells,
+    primary_style,
+    keystone,
+    sub_style,
+    op_score,
+    op_rank,
+  };
+}
+
+type SummaryRow = [number, string, string, boolean, [number, number, number], number, number, number, string];
+// champion id, name, position, win, k/d/a, cs, duration, seconds ago, queue
+const SUMMARY_ROWS: SummaryRow[] = [
+  [103, "Ahri", "middle", true, [9, 3, 8], 241, 1912, 25 * 60, "SOLORANKED"],
+  [134, "Syndra", "middle", false, [4, 7, 5], 198, 1744, 70 * 60, "SOLORANKED"],
+  [61, "Orianna", "middle", true, [6, 2, 14], 263, 2011, 2 * 3600, "SOLORANKED"],
+  [103, "Ahri", "middle", true, [12, 1, 6], 187, 1395, 20 * 3600, "FLEXRANKED"],
+  [238, "Zed", "middle", false, [3, 8, 2], 156, 1588, 27 * 3600, "NORMAL"],
+  [7, "LeBlanc", "middle", true, [10, 5, 7], 221, 1830, 2 * 86400, "SOLORANKED"],
+  [99, "Lux", "utility", false, [2, 6, 17], 34, 2140, 3 * 86400, "SOLORANKED"],
+  [103, "Ahri", "middle", true, [8, 4, 9], 233, 1702, 9 * 86400, "SOLORANKED"],
+];
+const SUMMARIES: GameSummary[] = SUMMARY_ROWS.map(([champion_id, champion, position, win, [kills, deaths, assists], cs, duration, ago, queue], i) => ({
+  id: `mock-${i + 1}`,
+  ended_at: NOW - ago,
+  duration,
+  queue,
+  win,
+  champion_id,
+  champion,
+  position,
+  kills,
+  deaths,
+  assists,
+  cs,
+}));
+
+function mockGame(id: string): GameRecord | null {
+  const s = SUMMARIES.find((g) => g.id === id);
+  if (!s) return null;
+  const players = BOARD.map(mockPlayer);
+  // Your row takes the summary's champion and score; the rest of the board is shared.
+  const me = players[2];
+  Object.assign(me, { champion_id: s.champion_id, champion: s.champion, kills: s.kills, deaths: s.deaths, assists: s.assists, cs: s.cs });
+  // Keep the lane opponent a different champion.
+  if (players[7].champion_id === s.champion_id) Object.assign(players[7], { champion_id: 61, champion: "Orianna" });
+  const blueWin = s.win ?? true;
+  const sum = (side: string, f: (p: PlayerRecord) => number) => players.filter((p) => p.side === side).reduce((a, p) => a + f(p), 0);
+  return {
+    version: 1,
+    id,
+    region: "EUW",
+    ended_at: s.ended_at,
+    duration: s.duration,
+    queue: s.queue,
+    average_tier: "EMERALD 2",
+    teams: [
+      { side: "BLUE", win: blueWin, kills: sum("BLUE", (p) => p.kills), dragons: 3, barons: 1, towers: blueWin ? 9 : 3, gold: sum("BLUE", (p) => p.gold), bans: [238, 157, 875, 266, 555] },
+      { side: "RED", win: !blueWin, kills: sum("RED", (p) => p.kills), dragons: 1, barons: 0, towers: blueWin ? 2 : 8, gold: sum("RED", (p) => p.gold), bans: [64, 777, 84, 122, 412] },
+    ],
+    players,
+    me: 2,
+  };
+}
+
+function gamesView(state: string): GamesView {
+  if (state === "games-empty") return { games: [], pending: [], syncing: false, error: null, account: "Summoner#EUW" };
+  return {
+    games: SUMMARIES,
+    pending: state === "games" ? [{ lcu_game_id: 7012345678, ended_at: NOW - 4 * 60, queue_id: 420, champion_id: 103 }] : [],
+    syncing: false,
+    error: null,
+    account: "Summoner#EUW",
+  };
+}
+
 /** Build GameAssets the same way src-tauri/src/assets.rs does, from live Data Dragon. */
 async function liveAssets(): Promise<GameAssets | null> {
   const get = (u: string) => fetch(u).then((r) => (r.ok ? r.json() : Promise.reject(r.status)));
@@ -230,6 +348,9 @@ export function mockBackend(): Backend {
       statusCbs.forEach((cb) => cb({ ...st, importing: false, last_import: ahriImport }));
     },
     refreshBuilds: async () => {},
+    getGames: async () => gamesView(state),
+    getGame: async (id) => mockGame(id),
+    refreshGames: async () => {},
     on: async (event: string, cb: (p: never) => void) => {
       if (event === "status") statusCbs.push(cb as (s: Status) => void);
       return () => {};
